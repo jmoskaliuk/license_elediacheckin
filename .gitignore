@@ -1,0 +1,16 @@
+# License server runtime state — never commit.
+.env
+
+# SQLite database + WAL/journal sidecar files.
+data/licenses.sqlite
+data/licenses.sqlite-*
+
+# ED25519 private keys MUST NEVER enter git history.
+data/keys/*.secret.key
+
+# Signed bundles are build artifacts — regenerate via bin/sign-bundle.php.
+data/bundles/*.json.sig
+
+# Keep placeholder dirs so fresh checkouts have the layout.
+!data/keys/.gitkeep
+!data/bundles/.gitkeep
