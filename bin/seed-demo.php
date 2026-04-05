@@ -86,12 +86,30 @@ if ($existing !== false) {
 
 // --- 3. Demo bundle ---------------------------------------------------
 $bundlepath = $bundledir . '/premium-v1.0.0.json';
-// license_server is a sibling of the plugin inside the workspace repo.
-$sourcebundle = $root . '/../mod_elediacheckin/db/content/default.json';
+// Auto-detect the plugin default.json across the two layouts we care about:
+//   - workspace layout: ../mod_elediacheckin/db/content/default.json
+//   - moodle deployed:  ../public/mod/elediacheckin/db/content/default.json
+//   - moodle deployed (alt): ../mod/elediacheckin/db/content/default.json
+$candidates = [
+    $root . '/../mod_elediacheckin/db/content/default.json',
+    $root . '/../public/mod/elediacheckin/db/content/default.json',
+    $root . '/../mod/elediacheckin/db/content/default.json',
+];
+$sourcebundle = null;
+foreach ($candidates as $candidate) {
+    if (is_readable($candidate)) {
+        $sourcebundle = $candidate;
+        break;
+    }
+}
 
 if (!file_exists($bundlepath)) {
-    if (!is_readable($sourcebundle)) {
-        fwrite(STDERR, "[seed] Source bundle not found at {$sourcebundle}\n");
+    if ($sourcebundle === null) {
+        fwrite(STDERR, "[seed] Source default.json not found in any known layout.\n");
+        fwrite(STDERR, "       Looked for:\n");
+        foreach ($candidates as $c) {
+            fwrite(STDERR, "         - {$c}\n");
+        }
         fwrite(STDERR, "       Drop a bundle.json into data/bundles/premium-v1.0.0.json manually.\n");
         exit(1);
     }
